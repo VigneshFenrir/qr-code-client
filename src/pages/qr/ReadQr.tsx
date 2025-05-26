@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const ReadQr: React.FC = () => {
-  const [data, setData] = useState<ProductType | null | string>(null);
+  const [data, setData] = useState<ProductType | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleImageUpload = async (
@@ -17,34 +17,47 @@ const ReadQr: React.FC = () => {
     if (!file) return;
 
     setError(null);
+    setData(null);
 
     const imageUrl = URL.createObjectURL(file);
     try {
       const codeReader = new BrowserQRCodeReader();
       const result = await codeReader.decodeFromImageUrl(imageUrl);
       const value = result.getText();
+
       if (value) {
         if (method === 1) {
           try {
-            const result = await api.get("/product/get", {
+            const response = await api.get("/product/get", {
               params: { id: value },
             });
-            // toast.success("QR generated successfully");
-            setError("");
-            setData(result.data?.qrData || "");
+            const qrData = response.data?.qrData;
+            if (qrData) {
+              setData(qrData);
+            } else {
+              setError("No product data found for this QR code.");
+              setData(null);
+            }
           } catch (error: any) {
-            console.log(error);
+            console.error(error);
             const errormessage = error.response?.data?.error;
             setError(errormessage || "Please try again later");
             setData(null);
           }
         } else {
-          setData(value);
+          try {
+            const parsed = JSON.parse(value);
+            setData(parsed);
+          } catch {
+            setError("QR code data is not valid JSON for product info.");
+            setData(null);
+          }
         }
       }
     } catch (err) {
       console.error(err);
       setError("Failed to read QR code. Make sure it's clear and visible.");
+      setData(null);
     }
   };
   useEffect(() => {
@@ -63,16 +76,7 @@ const ReadQr: React.FC = () => {
         className="block"
         id="qrCode"
       />
-      {typeof data === "object" && data && (
-        <div className="p-2 bg-green-100 border border-green-400 rounded">
-          <div className="flex flex-col gap-2">
-            <h2 className="font-semibold text-4xl pb-2">Product Details</h2>
-            <strong>Product Name:</strong> {data?.productName}
-            <strong>Product Color:</strong> {data?.color}
-            <strong>Product Price:</strong> {data?.price}
-          </div>
-        </div>
-      )}
+
       <Label htmlFor="qrCode">Upload Qr Code method 2</Label>
       <Input
         type="file"
@@ -82,13 +86,13 @@ const ReadQr: React.FC = () => {
         id="qrCode"
       />
 
-      {typeof data === "string" && data && (
+      {data && (
         <div className="p-2 bg-green-100 border border-green-400 rounded">
           <div className="flex flex-col gap-2">
             <h2 className="font-semibold text-4xl pb-2">Product Details</h2>
-            <strong>Product Name:</strong> {JSON.parse(data).productName}
-            <strong>Product Color:</strong> {JSON.parse(data).color}
-            <strong>Product Price:</strong> {JSON.parse(data).price}
+            <strong>Product Name:</strong> {data.productName}
+            <strong>Product Color:</strong> {data.color}
+            <strong>Product Price:</strong> {data.price}
           </div>
         </div>
       )}
