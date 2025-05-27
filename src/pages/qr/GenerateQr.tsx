@@ -44,6 +44,9 @@ const GenerateQR: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    if(name==="price"&&typeof value!== "number"){
+      return setError("price should be number") 
+    } 
     setProductData((prev) => ({
       ...prev,
       [name]: name === "price" ? Number(value) : value,
