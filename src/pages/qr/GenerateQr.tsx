@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export type ProductType = {
   productName: string;
   color: string;
-  price: number|string;
+  price: number;
 };
 
 const GenerateQR: React.FC = () => {
@@ -17,7 +17,7 @@ const GenerateQR: React.FC = () => {
   const [productData, setProductData] = useState<ProductType>({
     productName: "",
     color: "",
-    price: "", 
+    price: 0, 
   });
   const [error, setError] = useState<string>("");
   const [qrValue, setQrvalue] = useState<string>("");
@@ -44,9 +44,7 @@ const GenerateQR: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    if(name==="price"&&typeof value!== "number"){
-      return setError("price should be number") 
-    } 
+    
     setProductData((prev) => ({
       ...prev,
       [name]: name === "price" ? Number(value) : value,
@@ -110,7 +108,7 @@ const GenerateQR: React.FC = () => {
       <Label>Product Price</Label>
 
       <Input
-        type="text"
+        type="number"
         onChange={handleChange}
         value={productData.price}
         placeholder="Enter Product Price"
