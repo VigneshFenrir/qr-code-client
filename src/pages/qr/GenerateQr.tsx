@@ -107,7 +107,7 @@ const GenerateQR: React.FC = () => {
       <Label>Product Price</Label>
 
       <Input
-        type="number"
+        type="text"
         onChange={handleChange}
         value={productData.price}
         placeholder="Enter Product Price"
