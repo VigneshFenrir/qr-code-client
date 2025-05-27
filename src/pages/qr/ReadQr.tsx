@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { BrowserQRCodeReader } from "@zxing/browser";
-import api from "@/service/api";
 import { ProductType } from "./GenerateQr";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,8 +9,7 @@ const ReadQr: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleImageUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-    method: number
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -26,34 +24,21 @@ const ReadQr: React.FC = () => {
       const value = result.getText();
 
       if (value) {
-        if (method === 1) {
-          try {
-            const response = await api.get("/product/get", {
-              params: { id: value },
-            });
-            const qrData = response.data?.qrData;
-            if (qrData) {
-              setData(qrData);
-            } else {
-              setError("No product data found for this QR code.");
-              setData(null);
-            }
-          } catch (error: any) {
-            console.error(error);
-            const errormessage = error.response?.data?.error;
-            setError(errormessage || "Please try again later");
-            setData(null);
-          }
-        } else {
-          try {
-            const parsed = JSON.parse(value);
-            setData(parsed);
-          } catch {
-            setError("QR code data is not valid JSON for product info.");
-            setData(null);
-          }
+        console.log(value);
+        const valuesplitted = value.split("*");
+        console.log(valuesplitted);
+        const setvalue = valuesplitted.map((each) => each.split(":")).flat();
+        console.log(setvalue);
+        if (setvalue[0] !== "PRODUCTNAME") {
+          return setError("INVALID QR CODE");
         }
+        setData({
+          productName: setvalue[1],
+          color: setvalue[3],
+          price: Number(setvalue[5]),
+        });
       }
+      return setError("INVALID QR CODE");
     } catch (err) {
       console.error(err);
       setError("Failed to read QR code. Make sure it's clear and visible.");
@@ -72,16 +57,7 @@ const ReadQr: React.FC = () => {
       <Input
         type="file"
         accept="image/*"
-        onChange={(e) => handleImageUpload(e, 1)}
-        className="block"
-        id="qrCode"
-      />
-
-      <Label htmlFor="qrCode">Upload Qr Code method 2</Label>
-      <Input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleImageUpload(e, 2)}
+        onChange={handleImageUpload}
         className="block"
         id="qrCode"
       />

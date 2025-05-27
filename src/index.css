@@ -141,3 +141,34 @@
         --sidebar-ring: 217.2 91.2% 59.8%;
     }
 }
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-section,
+  .print-section * {
+    visibility: visible !important;
+  }
+
+  .print-section {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 30px;
+    background: white;
+  }
+
+  /* .page-break {
+    page-break-after: always;
+  } */
+
+  button,
+  nav,
+  header,
+  footer {
+    display: none !important;
+  }
+}

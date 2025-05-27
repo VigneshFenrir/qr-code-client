@@ -39,49 +39,7 @@ const GenerateQR: React.FC = () => {
   };
 
   const handlePrintQr = () => {
-    const canvas = qrRef.current?.querySelector("canvas");
-    if (!canvas) return;
-
-    const dataUrl = canvas.toDataURL("image/png");
-    const newWindow = window.open();
-    if (newWindow) {
-      newWindow.document.write(`
-      <html>
-        <head>
-          <title>Print QR Code</title>
-          <style>
-            @media print {
-              @page {
-                margin: 0;
-              }
-              body {
-                margin: 0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                height: 100vh;
-              }
-              img {
-                max-width: 100%;
-                max-height: 100vh;
-              }
-            }
-            body {
-              margin: 0;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100vh;
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${dataUrl}" onload="window.print(); window.close();" />
-        </body>
-      </html>
-    `);
-      newWindow.document.close();
-    }
+    window.print();
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -93,12 +51,21 @@ const GenerateQR: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    if (!productData.productName || !productData.color || !productData.price) {
+      setError("Please fill in all fields before generating QR.");
+      return;
+    }
+
     setLoading(true);
     try {
       const result = await api.post("/product/create", productData);
       toast.success("QR generated successfully");
       setError("");
-      setQrvalue(result.data?.qrData || "");
+      setQrvalue(
+        `PRODUCTNAME:${productData.productName.toUpperCase()}*COLOR:${productData.color.toUpperCase()}*PRICE:${
+          productData.price
+        }` || ""
+      );
     } catch (error: any) {
       console.log(error);
       const errormessage = error.response?.data?.error;
@@ -111,14 +78,6 @@ const GenerateQR: React.FC = () => {
     }
   };
 
-  const handleScan = () => {
-    const { productName, color, price } = productData;
-    if (!productName || !color || !price) {
-      return setError("please fill all the fields");
-    }
-    setError("");
-    setQrvalue(JSON.stringify(productData));
-  };
   useEffect(() => {
     document.title = "Generate Qr Code";
   }, []);
@@ -171,9 +130,6 @@ const GenerateQR: React.FC = () => {
             "Generate QR"
           )}
         </Button>
-        <Button variant={"outline"} onClick={handleScan} disabled={!!qrValue}>
-          Generate method 2
-        </Button>
       </div>
       {qrValue && (
         <div className="flex flex-col items-center gap-4 ">
@@ -186,6 +142,30 @@ const GenerateQR: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Print Section */}
+      <div className="print-section hidden print:block p-6">
+        <div className="flex border border-black p-4 mb-6 items-center gap-6 page-break">
+          <QRCodeCanvas
+            value={`PRODUCTNAME:${productData.productName.toUpperCase()}*COLOR:${productData.color.toUpperCase()}*PRICE:${
+              productData.price
+            }`}
+            size={100}
+            includeMargin
+            className="w-32 h-32 border"
+          />
+          <div className="text-left text-lg">
+            <p>
+              <strong>Product Name:</strong> {productData.productName}
+            </p>
+            <p>
+              <strong>Color:</strong> {productData.color}
+            </p>
+            <p>
+              <strong>Price:</strong> ₹{productData.price}
+            </p>
+          </div>
+        </div>
+      </div>
     </main>
   );
 };
