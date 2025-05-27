@@ -58,7 +58,7 @@ const GenerateQR: React.FC = () => {
 
     setLoading(true);
     try {
-      const result = await api.post("/product/create", productData);
+      await api.post("/product/create", productData);
       toast.success("QR generated successfully");
       setError("");
       setQrvalue(
