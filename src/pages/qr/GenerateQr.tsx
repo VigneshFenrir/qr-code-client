@@ -44,7 +44,7 @@ const GenerateQR: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    let newValue;
+    let newValue:any;
     if(name==="price") {
       newValue=value.replace(/0+/, "") ;
     }
