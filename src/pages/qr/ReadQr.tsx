@@ -37,8 +37,8 @@ const ReadQr: React.FC = () => {
           color: setvalue[3],
           price: Number(setvalue[5]),
         });
-      }
-      return setError("INVALID QR CODE");
+      }else{      return setError("INVALID QR CODE")
+}
     } catch (err) {
       console.error(err);
       setError("Failed to read QR code. Make sure it's clear and visible.");
