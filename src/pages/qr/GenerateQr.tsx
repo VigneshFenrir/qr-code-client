@@ -9,7 +9,7 @@ import { toast } from "sonner";
 export type ProductType = {
   productName: string;
   color: string;
-  price: number;
+  price: number|string;
 };
 
 const GenerateQR: React.FC = () => {
@@ -17,7 +17,7 @@ const GenerateQR: React.FC = () => {
   const [productData, setProductData] = useState<ProductType>({
     productName: "",
     color: "",
-    price: 0,
+    price: "", 
   });
   const [error, setError] = useState<string>("");
   const [qrValue, setQrvalue] = useState<string>("");
